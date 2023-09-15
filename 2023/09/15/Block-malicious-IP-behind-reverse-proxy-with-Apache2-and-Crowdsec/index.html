@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics [05012020]-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZVHC0BJQ4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5ZVHC0BJQ4');
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <title>Block malicious IP behind reverse proxy with Apache2 and Crowdsec | --= 0x25 =--</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="PurposeBlock malicious incoming IP with Apache2 behind a reverse proxy using X-Forwarding-For and Crowdsec solution.It’s not a Crowdsec help installation. Read the documentation for that :D, browse">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Block malicious IP behind reverse proxy with Apache2 and Crowdsec">
+<meta property="og:url" content="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/index.html">
+<meta property="og:site_name" content="--&#x3D; 0x25 &#x3D;--">
+<meta property="og:description" content="PurposeBlock malicious incoming IP with Apache2 behind a reverse proxy using X-Forwarding-For and Crowdsec solution.It’s not a Crowdsec help installation. Read the documentation for that :D, browse">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/block.png">
+<meta property="og:image" content="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/schema.png">
+<meta property="og:image" content="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/files.png">
+<meta property="og:image" content="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/apache2-CS-X-Forwarded-for-Bouncer.gif">
+<meta property="article:published_time" content="2023-09-15T14:59:28.000Z">
+<meta property="article:modified_time" content="2023-09-15T16:38:54.840Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="crowdsec">
+<meta property="article:tag" content="apache2">
+<meta property="article:tag" content="x-forwarded-for">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/block.png">
+  
+    <link rel="alternate" href="/atom.xml" title="--= 0x25 =--" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">--= 0x25 =--</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" target="_blank" rel="noopener" href="https://github.com/0x25">Github</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://0x25.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/" class="article-date">
+  <time datetime="2023-09-15T14:59:28.000Z" itemprop="datePublished">15-09-2023</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Block malicious IP behind reverse proxy with Apache2 and Crowdsec
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/block.png" alt="Block IP crowdsec apache2 x-forwarded-for"> </p>
+<h1 id="Purpose"><a href="#Purpose" class="headerlink" title="Purpose"></a>Purpose</h1><p>Block malicious incoming IP with Apache2 behind a reverse proxy using X-Forwarding-For and Crowdsec solution.<br>It’s not a Crowdsec help installation. Read the documentation for that :D, browse Internet, we hope you already know the solution.</p>
+<p>You need to have a Apache2 installation of course.</p>
+<p><img src="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/schema.png" alt="Architecture"></p>
+<h1 id="Configuration"><a href="#Configuration" class="headerlink" title="Configuration"></a>Configuration</h1><p>Your web server is behind a reverse proxy and the only IP he see is the reverse proxy one. You need to activate X-Forwarded-For HTTP header to add client IP in HTTP query. Now, you need to configure Apache2 to logs X-ForWarded-For IP instead of reverse proxy IP. There is multiple example on Internet but basically you can replace :</p>
+<pre><code>LogFormat &quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot; combined</code></pre>
+<p>by</p>
+<pre><code>LogFormat &quot;%&#123;X-Forwarded-For&#125;i %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%&#123;Referer&#125;i\&quot; \&quot;%&#123;User-Agent&#125;i\&quot;&quot; combined</code></pre>
+<p>in apache2.conf/httpd.conf</p>
+<p>Now you can install Crowdsec to your server to protect you from attack. Here is the documentation :  <a target="_blank" rel="noopener" href="https://docs.crowdsec.net/docs/getting_started/install_crowdsec/">install crowdsec</a></p>
+<p>Normally Crowdsec install the right Collections (parsers and scenarios) to ingest your Apache2 logs (access.log).</p>
+<pre><code># cscli collections list</code></pre>
+<p>check you see Apache2, base-http-scenario, http-cve</p>
+<pre><code># cscli parsers list</code></pre>
+<p>check you see apache2-logs, dataparse-enrich, goip-enrich, http-logs, syslog-logs</p>
+<pre><code># cscli scenarios list</code></pre>
+<p>a lot …</p>
+<p>At this point Crowdsec will process the logs and make decisions/alerts (# cscli metrics).<br>Now we are going to install custom-bouncer in Crowdsec, all is here <a target="_blank" rel="noopener" href="https://doc.crowdsec.net/docs/bouncers/custom/">https://doc.crowdsec.net/docs/bouncers/custom/</a>.<br>When the installation is done we are going to create a folder</p>
+<pre><code># mkdir /etc/crowdsec/custom-script</code></pre>
+<p> and add this script blocklist.sh with vi, vim , nano …<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"> #!&#x2F;bin&#x2F;bash</span><br><span class="line"># 0x25</span><br><span class="line"></span><br><span class="line">logpath&#x3D;&#39;&#x2F;tmp&#x2F;blocklist.log&#39;</span><br><span class="line">filepath&#x3D;&#39;&#x2F;etc&#x2F;apache2&#x2F;blocklist.txt&#39;</span><br><span class="line">tmpfilepath&#x3D;&#39;&#x2F;tmp&#x2F;blocklist.tmp&#39;</span><br><span class="line"></span><br><span class="line">action&#x3D;&#39;&#39;</span><br><span class="line">ip&#x3D;&#39;&#39;</span><br><span class="line">duration&#x3D;&#39;&#39;</span><br><span class="line">reason&#x3D;&#39;&#39;</span><br><span class="line">json&#x3D;&#39;&#39;</span><br><span class="line"></span><br><span class="line"># check action</span><br><span class="line">if [[ &quot;$1&quot; !&#x3D; &quot;add&quot; &amp;&amp; &quot;$1&quot; !&#x3D; &quot;del&quot; ]]; then</span><br><span class="line">  echo &quot;$(date) - Error: first arg need to be add or del - $@&quot; &gt;&gt; $logpath</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line">action&#x3D;$1</span><br><span class="line"></span><br><span class="line"># check IP IPV4</span><br><span class="line">if ! [[ &quot;$2&quot; &#x3D;~ ^[0-9]&#123;1,3&#125;\.[0-9]&#123;1,3&#125;\.[0-9]&#123;1,3&#125;\.[0-9]&#123;1,3&#125;$ ]]; then</span><br><span class="line">  echo &quot;$(date) - Error: seconf arg need to be an IPv4 - $@&quot; &gt;&gt; $logpath</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line">ip&#x3D;$2</span><br><span class="line"></span><br><span class="line"># check time</span><br><span class="line">if ! [[ &quot;$3&quot; &#x3D;~ ^[-0-9]+$ ]]; then</span><br><span class="line">  echo &quot;$(date) - Error: third arg need to be an integer - $@&quot; &gt;&gt; $logpath</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">duration&#x3D;$3</span><br><span class="line">reason&#x3D;$4</span><br><span class="line">json&#x3D;$5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if [[ &quot;$action&quot; &#x3D;&#x3D; &quot;add&quot; ]]; then</span><br><span class="line">  # Add IP</span><br><span class="line">  if ! grep -q -F $ip $filepath; then</span><br><span class="line">    echo &quot;$(date) - Info: add $ip&quot; &gt;&gt; $logpath</span><br><span class="line">    echo &quot;$ip b&quot; &gt;&gt; $filepath</span><br><span class="line">  else</span><br><span class="line">    echo &quot;$(date) - Warning: add $ip already exist&quot; &gt;&gt; $logpath</span><br><span class="line">  fi</span><br><span class="line">else</span><br><span class="line">  # Del IP</span><br><span class="line">  echo &quot;$(date) - Info: del $ip&quot; &gt;&gt; $logpath</span><br><span class="line">  pattern&#x3D;&quot;$ip b&quot;</span><br><span class="line">  sed &quot;&#x2F;$pattern&#x2F;d&quot; $filepath &gt; $tmpfilepath</span><br><span class="line">  cp $tmpfilepath $filepath</span><br><span class="line">fi</span><br></pre></td></tr></table></figure><br><em>disable script log in production</em></p>
+<pre><code># chmod +x blocklist.sh</code></pre>
+<p>configure the custom-bouncer by editing the file </p>
+<pre><code># /etc/crowdsec/bouncers/crowdsec-custom-bouncer.yaml.local</code></pre>
+<p>it depend on your installation but if the file not exist edit the file without .local</p>
+<p>Edit </p>
+<pre><code>bin_path: /etc/crowdsec/custom-script/blocklist.sh
+api_key: &lt;follow doc&gt;</code></pre>
+<p>now restart crowdsec</p>
+<pre><code># systemctl restart crowdsec.service</code></pre>
+<p>Normally you will see a file in /etc/apache2/ with name bloacklist.txt with data like </p>
+<p><img src="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/files.png" alt="blocklist"> </p>
+<pre><code>1.2.3.4 b
+2.3.4.5 b
+...</code></pre>
+<p>If there is no file you need to check the logs (Crowdsec custom bouncer and blocklist.sh)</p>
+<p>Now we need to configure Apache2 to use this list and block income traffic \o/</p>
+<p>install modrewrite </p>
+<pre><code># a2enmod rewrite</code></pre>
+<p>edit apache2.conf/httpd.conf and add</p>
+<pre><code>active &quot;AllowOverride All&quot;</code></pre>
+<p>add</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RewriteEngine On</span><br><span class="line">RewriteMap blocklist txt:&#x2F;etc&#x2F;apache2&#x2F;blocklist.txt</span><br><span class="line">RewriteCond $&#123;blocklist:%&#123;HTTP:X-Forwarded-For&#125;&#125; ^b$ [NC]</span><br><span class="line">RewriteRule .* - [F,L]</span><br></pre></td></tr></table></figure>
+<p><em>/!\ change apache 2 to httpd if needed</em></p>
+<p>restart apache2</p>
+<pre><code># systemctl restart apache2</code></pre>
+<p>and it is finish :), have fun.</p>
+<p><img src="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/apache2-CS-X-Forwarded-for-Bouncer.gif" alt="demo"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/" data-id="clmktquuq0000qvd47hwca9jn" class="article-share-link">Share</a>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a>
+      
+        <a href="https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/apache2/" rel="tag">apache2</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crowdsec/" rel="tag">crowdsec</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/x-forwarded-for/" rel="tag">x-forwarded-for</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/09/09/Patch-TCP-packets-on-the-fly/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Patch TCP packets on the fly</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTPS-TLS/" rel="tag">HTTPS/TLS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tunnel/" rel="tag">Tunnel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apache2/" rel="tag">apache2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/binwalk/" rel="tag">binwalk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/burp/" rel="tag">burp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/challenge/" rel="tag">challenge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cntlm/" rel="tag">cntlm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crowdsec/" rel="tag">crowdsec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/discord/" rel="tag">discord</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hackthebox/" rel="tag">hackthebox</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hidden-service/" rel="tag">hidden service</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lua/" rel="tag">lua</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/minecraft/" rel="tag">minecraft</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks/" rel="tag">socks</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks5/" rel="tag">socks5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlite/" rel="tag">sqlite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssf/" rel="tag">ssf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcp/" rel="tag">tcp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcpproxy/" rel="tag">tcpproxy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tor/" rel="tag">tor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/unix-socket/" rel="tag">unix socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websec/" rel="tag">websec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wireshark/" rel="tag">wireshark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/x-forwarded-for/" rel="tag">x-forwarded-for</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zero-day/" rel="tag">zero-day</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/HTTPS-TLS/" style="font-size: 10px;">HTTPS/TLS</a> <a href="/tags/Tunnel/" style="font-size: 10px;">Tunnel</a> <a href="/tags/apache2/" style="font-size: 10px;">apache2</a> <a href="/tags/binwalk/" style="font-size: 10px;">binwalk</a> <a href="/tags/burp/" style="font-size: 10px;">burp</a> <a href="/tags/challenge/" style="font-size: 20px;">challenge</a> <a href="/tags/cntlm/" style="font-size: 10px;">cntlm</a> <a href="/tags/crowdsec/" style="font-size: 10px;">crowdsec</a> <a href="/tags/ctf/" style="font-size: 10px;">ctf</a> <a href="/tags/discord/" style="font-size: 10px;">discord</a> <a href="/tags/docker/" style="font-size: 20px;">docker</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/hackthebox/" style="font-size: 20px;">hackthebox</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hidden-service/" style="font-size: 10px;">hidden service</a> <a href="/tags/lua/" style="font-size: 10px;">lua</a> <a href="/tags/minecraft/" style="font-size: 10px;">minecraft</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/socks/" style="font-size: 20px;">socks</a> <a href="/tags/socks5/" style="font-size: 10px;">socks5</a> <a href="/tags/sqlite/" style="font-size: 10px;">sqlite</a> <a href="/tags/ssf/" style="font-size: 10px;">ssf</a> <a href="/tags/ssh/" style="font-size: 10px;">ssh</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/tcpproxy/" style="font-size: 10px;">tcpproxy</a> <a href="/tags/tor/" style="font-size: 10px;">tor</a> <a href="/tags/unix-socket/" style="font-size: 10px;">unix socket</a> <a href="/tags/web/" style="font-size: 20px;">web</a> <a href="/tags/websec/" style="font-size: 10px;">websec</a> <a href="/tags/wireshark/" style="font-size: 10px;">wireshark</a> <a href="/tags/x-forwarded-for/" style="font-size: 10px;">x-forwarded-for</a> <a href="/tags/zero-day/" style="font-size: 10px;">zero-day</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">September 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/">Block malicious IP behind reverse proxy with Apache2 and Crowdsec</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/09/Patch-TCP-packets-on-the-fly/">Patch TCP packets on the fly</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/03/Zero-day-in-industrial-wifi-equipment/">Zero-day in industrial wifi equipment</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/02/Create-your-hidden-Tor-service-with-unix-socket/">Create your hidden Tor service with unix socket</a>
+          </li>
+        
+          <li>
+            <a href="/2021/03/10/Docker-SSH-on-the-fly/">Docker SSH on the fly</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2023 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+    <div>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/0x25" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'https-0x25-github-io';
+  
+  var disqus_url = 'https://0x25.github.io/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

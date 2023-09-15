@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics [05012020]-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZVHC0BJQ4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5ZVHC0BJQ4');
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <title>Docker SSH on the fly | --= 0x25 =--</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="purposeCreate an image, a script and a bit of local configuration to pop SSH container on the …. fly. prerequisiteHave docker installed. Create a folder to start the project and add configFiles&#x2F;   Cr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker SSH on the fly">
+<meta property="og:url" content="https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/index.html">
+<meta property="og:site_name" content="--&#x3D; 0x25 &#x3D;--">
+<meta property="og:description" content="purposeCreate an image, a script and a bit of local configuration to pop SSH container on the …. fly. prerequisiteHave docker installed. Create a folder to start the project and add configFiles&#x2F;   Cr">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/docker-ssh-header.png">
+<meta property="og:image" content="https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/dockerSSH.gif">
+<meta property="article:published_time" content="2021-03-10T21:00:45.000Z">
+<meta property="article:modified_time" content="2021-05-02T13:15:07.955Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="ssh">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/docker-ssh-header.png">
+  
+    <link rel="alternate" href="/atom.xml" title="--= 0x25 =--" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">--= 0x25 =--</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" target="_blank" rel="noopener" href="https://github.com/0x25">Github</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://0x25.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Docker-SSH-on-the-fly" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/03/10/Docker-SSH-on-the-fly/" class="article-date">
+  <time datetime="2021-03-10T21:00:45.000Z" itemprop="datePublished">10-03-2021</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Docker SSH on the fly
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/2021/03/10/Docker-SSH-on-the-fly/docker-ssh-header.png" alt="Docker SSH on the fly"></p>
+<h1 id="purpose"><a href="#purpose" class="headerlink" title="purpose"></a>purpose</h1><p>Create an image, a script and a bit of local configuration to pop SSH container on the …. fly.</p>
+<h1 id="prerequisite"><a href="#prerequisite" class="headerlink" title="prerequisite"></a>prerequisite</h1><p>Have docker <a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/ubuntu/">installed</a>.</p>
+<p>Create a folder to start the project and add configFiles/  </p>
+<p>Create configFiles/bashrc</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><span class="line"># ~&#x2F;.bashrc: executed by bash(1) for non-login shells.</span><br><span class="line"># see &#x2F;usr&#x2F;share&#x2F;doc&#x2F;bash&#x2F;examples&#x2F;startup-files (in the package bash-doc)</span><br><span class="line"># for examples</span><br><span class="line"></span><br><span class="line"># If not running interactively, don&#39;t do anything</span><br><span class="line">case $- in</span><br><span class="line">    *i*) ;;</span><br><span class="line">      *) return;;</span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line"># don&#39;t put duplicate lines or lines starting with space in the history.</span><br><span class="line"># See bash(1) for more options</span><br><span class="line">HISTCONTROL&#x3D;ignoreboth</span><br><span class="line"></span><br><span class="line"># append to the history file, don&#39;t overwrite it</span><br><span class="line">shopt -s histappend</span><br><span class="line"></span><br><span class="line"># for setting history length see HISTSIZE and HISTFILESIZE in bash(1)</span><br><span class="line">HISTSIZE&#x3D;1000</span><br><span class="line">HISTFILESIZE&#x3D;2000</span><br><span class="line"></span><br><span class="line"># check the window size after each command and, if necessary,</span><br><span class="line"># update the values of LINES and COLUMNS.</span><br><span class="line">shopt -s checkwinsize</span><br><span class="line"></span><br><span class="line"># If set, the pattern &quot;**&quot; used in a pathname expansion context will</span><br><span class="line"># match all files and zero or more directories and subdirectories.</span><br><span class="line">#shopt -s globstar</span><br><span class="line"></span><br><span class="line"># make less more friendly for non-text input files, see lesspipe(1)</span><br><span class="line">[ -x &#x2F;usr&#x2F;bin&#x2F;lesspipe ] &amp;&amp; eval &quot;$(SHELL&#x3D;&#x2F;bin&#x2F;sh lesspipe)&quot;</span><br><span class="line"></span><br><span class="line"># set variable identifying the chroot you work in (used in the prompt below)</span><br><span class="line">if [ -z &quot;$&#123;debian_chroot:-&#125;&quot; ] &amp;&amp; [ -r &#x2F;etc&#x2F;debian_chroot ]; then</span><br><span class="line">    debian_chroot&#x3D;$(cat &#x2F;etc&#x2F;debian_chroot)</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># set a fancy prompt (non-color, unless we know we &quot;want&quot; color)</span><br><span class="line">case &quot;$TERM&quot; in</span><br><span class="line">    xterm-color|*-256color) color_prompt&#x3D;yes;;</span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line"># uncomment for a colored prompt, if the terminal has the capability; turned</span><br><span class="line"># off by default to not distract the user: the focus in a terminal window</span><br><span class="line"># should be on the output of commands, not on the prompt</span><br><span class="line">#force_color_prompt&#x3D;yes</span><br><span class="line"></span><br><span class="line">if [ -n &quot;$force_color_prompt&quot; ]; then</span><br><span class="line">    if [ -x &#x2F;usr&#x2F;bin&#x2F;tput ] &amp;&amp; tput setaf 1 &gt;&amp;&#x2F;dev&#x2F;null; then</span><br><span class="line">	# We have color support; assume it&#39;s compliant with Ecma-48</span><br><span class="line">	# (ISO&#x2F;IEC-6429). (Lack of such support is extremely rare, and such</span><br><span class="line">	# a case would tend to support setf rather than setaf.)</span><br><span class="line">	color_prompt&#x3D;yes</span><br><span class="line">    else</span><br><span class="line">	color_prompt&#x3D;</span><br><span class="line">    fi</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># custom</span><br><span class="line">IP&#x3D;$(tac &#x2F;etc&#x2F;hosts | head -n 1 | awk &#39;&#123;print $1&#125;&#39;)</span><br><span class="line">if [ ! -f .colorc ]; then</span><br><span class="line">    COLOR&#x3D;$((1 + $RANDOM % 256))</span><br><span class="line">    echo -ne $COLOR &gt; .colorc</span><br><span class="line">else</span><br><span class="line">    COLOR&#x3D;$(cat .colorc)</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ &quot;$color_prompt&quot; &#x3D; yes ]; then</span><br><span class="line">    PS1&#x3D;&#39;$&#123;debian_chroot:+($debian_chroot)&#125;\[\033[48;5;$&#123;COLOR&#125;m\](Docker)\[\033[00m\]\[\033[01;95m\] \u@$&#123;IP&#125;\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ &#39;</span><br><span class="line">else</span><br><span class="line">    PS1&#x3D;&#39;$&#123;debian_chroot:+($debian_chroot)&#125;\u@\h:\w\$ &#39;</span><br><span class="line">fi</span><br><span class="line">unset color_prompt force_color_prompt</span><br><span class="line"></span><br><span class="line"># If this is an xterm set the title to user@host:dir</span><br><span class="line">case &quot;$TERM&quot; in</span><br><span class="line">xterm*|rxvt*)</span><br><span class="line">    PS1&#x3D;&quot;\[\e]0;$&#123;debian_chroot:+($debian_chroot)&#125;\u@\h: \w\a\]$PS1&quot;</span><br><span class="line">    ;;</span><br><span class="line">*)</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line"># enable color support of ls and also add handy aliases</span><br><span class="line">if [ -x &#x2F;usr&#x2F;bin&#x2F;dircolors ]; then</span><br><span class="line">    test -r ~&#x2F;.dircolors &amp;&amp; eval &quot;$(dircolors -b ~&#x2F;.dircolors)&quot; || eval &quot;$(dircolors -b)&quot;</span><br><span class="line">    alias ls&#x3D;&#39;ls --color&#x3D;auto&#39;</span><br><span class="line">    #alias dir&#x3D;&#39;dir --color&#x3D;auto&#39;</span><br><span class="line">    #alias vdir&#x3D;&#39;vdir --color&#x3D;auto&#39;</span><br><span class="line"></span><br><span class="line">    alias grep&#x3D;&#39;grep --color&#x3D;auto&#39;</span><br><span class="line">    alias fgrep&#x3D;&#39;fgrep --color&#x3D;auto&#39;</span><br><span class="line">    alias egrep&#x3D;&#39;egrep --color&#x3D;auto&#39;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># colored GCC warnings and errors</span><br><span class="line">#export GCC_COLORS&#x3D;&#39;error&#x3D;01;31:warning&#x3D;01;35:note&#x3D;01;36:caret&#x3D;01;32:locus&#x3D;01:quote&#x3D;01&#39;</span><br><span class="line"></span><br><span class="line"># some more ls aliases</span><br><span class="line">alias ll&#x3D;&#39;ls -alF&#39;</span><br><span class="line">alias la&#x3D;&#39;ls -A&#39;</span><br><span class="line">alias l&#x3D;&#39;ls -CF&#39;</span><br><span class="line"></span><br><span class="line"># You may want to put all your additions into a separate file like</span><br><span class="line"># ~&#x2F;.bash_aliases, instead of adding them here directly.</span><br><span class="line"># See &#x2F;usr&#x2F;share&#x2F;doc&#x2F;bash-doc&#x2F;examples in the bash-doc package.</span><br><span class="line"></span><br><span class="line">if [ -f ~&#x2F;.bash_aliases ]; then</span><br><span class="line">    . ~&#x2F;.bash_aliases</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># enable programmable completion features (you don&#39;t need to enable</span><br><span class="line"># this, if it&#39;s already enabled in &#x2F;etc&#x2F;bash.bashrc and &#x2F;etc&#x2F;profile</span><br><span class="line"># sources &#x2F;etc&#x2F;bash.bashrc).</span><br><span class="line">if ! shopt -oq posix; then</span><br><span class="line">  if [ -f &#x2F;usr&#x2F;share&#x2F;bash-completion&#x2F;bash_completion ]; then</span><br><span class="line">    . &#x2F;usr&#x2F;share&#x2F;bash-completion&#x2F;bash_completion</span><br><span class="line">  elif [ -f &#x2F;etc&#x2F;bash_completion ]; then</span><br><span class="line">    . &#x2F;etc&#x2F;bash_completion</span><br><span class="line">  fi</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p>Create a configFiles/sudoers  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line"># This file MUST be edited with the &#39;visudo&#39; command as root.</span><br><span class="line">#</span><br><span class="line"># Please consider adding local content in &#x2F;etc&#x2F;sudoers.d&#x2F; instead of</span><br><span class="line"># directly modifying this file.</span><br><span class="line">#</span><br><span class="line"># See the man page for details on how to write a sudoers file.</span><br><span class="line">#</span><br><span class="line">Defaults	env_reset</span><br><span class="line">Defaults	mail_badpass</span><br><span class="line">Defaults	secure_path&#x3D;&quot;&#x2F;usr&#x2F;local&#x2F;sbin:&#x2F;usr&#x2F;local&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin:&#x2F;sbin:&#x2F;bin:&#x2F;snap&#x2F;bin&quot;</span><br><span class="line"></span><br><span class="line"># Host alias specification</span><br><span class="line"></span><br><span class="line"># User alias specification</span><br><span class="line"></span><br><span class="line"># Cmnd alias specification</span><br><span class="line"></span><br><span class="line"># User privilege specification</span><br><span class="line">root	ALL&#x3D;(ALL:ALL) ALL</span><br><span class="line"></span><br><span class="line"># Members of the admin group may gain root privileges</span><br><span class="line">%admin ALL&#x3D;(ALL) ALL</span><br><span class="line"></span><br><span class="line"># Allow members of group sudo to execute any command</span><br><span class="line">%sudo  ALL&#x3D;(ALL) NOPASSWD: ALL</span><br><span class="line"></span><br><span class="line"># See sudoers(5) for more information on &quot;#include&quot; directives:</span><br><span class="line"></span><br><span class="line">#includedir &#x2F;etc&#x2F;sudoers.d</span><br></pre></td></tr></table></figure>
+
+
+<p>Add your SSH <a target="_blank" rel="noopener" href="https://www.ssh.com/ssh/keygen/">public key</a> and paste it to configFiles/id_rsa.pub</p>
+<p>Finally :  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">configFiles&#x2F;</span><br><span class="line">├── bashrc</span><br><span class="line">├── id_rsa.pub</span><br><span class="line">└── sudoers</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="Image"><a href="#Image" class="headerlink" title="Image"></a>Image</h1><p>first create a Dockerfile</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu</span><br><span class="line"></span><br><span class="line"><span class="comment"># Update and install component</span></span><br><span class="line">RUN apt-get update</span><br><span class="line">RUN apt-get -y install openssh-server sudo</span><br><span class="line"></span><br><span class="line"><span class="comment"># add sudoers right</span></span><br><span class="line">ADD configFiles/sudoers /etc/sudoers</span><br><span class="line">RUN mkdir /var/run/sshd; chmod 755 /var/run/sshd</span><br><span class="line"></span><br><span class="line"><span class="comment"># create a local user</span></span><br><span class="line">RUN groupadd <span class="built_in">local</span></span><br><span class="line">RUN useradd -m -s /bin/bash -g <span class="built_in">local</span> -G sudo -u 1000 <span class="built_in">local</span></span><br><span class="line">RUN mkdir /home/<span class="built_in">local</span>/.ssh; chmod 700 /home/<span class="built_in">local</span>/.ssh</span><br><span class="line"></span><br><span class="line"><span class="comment"># add bashrc with cool prompt</span></span><br><span class="line">ADD configFiles/bashrc /home/<span class="built_in">local</span>/.bashrc</span><br><span class="line">ADD configFiles/bashrc /root/.bashrc</span><br><span class="line"></span><br><span class="line"><span class="comment"># add your public SSH key</span></span><br><span class="line">ADD configFiles/id_rsa.pub /home/<span class="built_in">local</span>/.ssh/authorized_keys</span><br><span class="line">RUN chmod 600 /home/<span class="built_in">local</span>/.ssh/authorized_keys</span><br><span class="line">RUN chown -R <span class="built_in">local</span>:<span class="built_in">local</span> home/<span class="built_in">local</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># remove some file to get a clean start</span></span><br><span class="line">RUN rm /etc/update-motd.d/*</span><br><span class="line">RUN rm /etc/legal</span><br><span class="line">RUN touch /home/<span class="built_in">local</span>/.sudo_as_admin_successful</span><br><span class="line"></span><br><span class="line"><span class="comment"># start SSH</span></span><br><span class="line">EXPOSE 22</span><br><span class="line">CMD [<span class="string">&quot;/usr/sbin/sshd&quot;</span>,<span class="string">&quot;-D&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>Now to create the image run :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t docker_ssh --label latest --pull .</span><br></pre></td></tr></table></figure>
+
+<p>This will create the image : <strong>docker_ssh:latest</strong></p>
+<h1 id="SSH-config"><a href="#SSH-config" class="headerlink" title="SSH config"></a>SSH config</h1><p>Configure your .ssh/config file (create or modify), and add</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Host 172.17.*.*</span><br><span class="line">	User <span class="built_in">local</span></span><br><span class="line">	StrictHostKeyChecking no</span><br><span class="line">	IdentityFile ~/.ssh/id_rsa.pkey	</span><br><span class="line">	LogLevel QUIET</span><br></pre></td></tr></table></figure>
+
+<p>for the IP 172.17.0.0/16 (default docker range)<br>use user “local”<br>don’t check the key (on local env only)<br>use your private key (change if needed)<br>no log  </p>
+<h1 id="Bash-script-to-start-SSH-container-on-the-fly"><a href="#Bash-script-to-start-SSH-container-on-the-fly" class="headerlink" title="Bash script to start SSH container on the fly"></a>Bash script to start SSH container on the fly</h1><p>startDocker_ssh.sh  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line"></span><br><span class="line">docker_name&#x3D;&quot;ssh&quot;</span><br><span class="line">docker_image&#x3D;&#39;docker_ssh&#39;</span><br><span class="line"></span><br><span class="line"># help</span><br><span class="line">usage()&#123;</span><br><span class="line">  echo &quot;-n [name] for the docker name prefix, default : $&#123;docker_name&#125;&quot;</span><br><span class="line">	echo &quot;-l for the number of docker, default : 1&quot;</span><br><span class="line">	echo &quot;-i for the docker image name , default : $&#123;docker_image&#125;&quot;</span><br><span class="line">	echo &quot;-h for the help&quot;</span><br><span class="line">  exit 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">random_id()&#123;</span><br><span class="line">	echo $(cat &#x2F;dev&#x2F;random | tr -dc &#39;a-zA-Z0-9&#39; | fold -w 4 | head -n 1)</span><br><span class="line">&#125;</span><br><span class="line">loop&#x3D;1</span><br><span class="line"></span><br><span class="line">while getopts &quot;:n:i:l:h&quot; options; do</span><br><span class="line"></span><br><span class="line">	case &quot;$&#123;options&#125;&quot; in</span><br><span class="line">	h)</span><br><span class="line">		usage</span><br><span class="line">		exit</span><br><span class="line">		;;</span><br><span class="line">	n)</span><br><span class="line">		docker_name&#x3D;$&#123;OPTARG&#125;</span><br><span class="line">		;;</span><br><span class="line">  i)</span><br><span class="line">    docker_image&#x3D;$&#123;OPTARG&#125;</span><br><span class="line">    ;;</span><br><span class="line">	l)</span><br><span class="line">		loop&#x3D;$&#123;OPTARG&#125;</span><br><span class="line">		re_isanum&#x3D;&#39;^[0-9]+$&#39;</span><br><span class="line">		if ! [[ $loop &#x3D;~ $re_isanum ]]; then</span><br><span class="line"></span><br><span class="line">			echo &quot;Error: i must be a num&quot;</span><br><span class="line">			usage</span><br><span class="line">			exit 2</span><br><span class="line">		elif [ $loop -eq &quot;0&quot; ]; then</span><br><span class="line"></span><br><span class="line">			echo &quot;Error: i must be &gt; 0&quot;</span><br><span class="line">			usage</span><br><span class="line">			exit 3</span><br><span class="line">		fi</span><br><span class="line">		;;</span><br><span class="line">	:)</span><br><span class="line">		echo &quot;Error: -$&#123;OPTARG&#125; requires an argument.&quot;</span><br><span class="line">		usage</span><br><span class="line">		exit 4</span><br><span class="line">		;;</span><br><span class="line">	*)</span><br><span class="line">		echo &quot;Error: fail option...&quot;</span><br><span class="line">		usage</span><br><span class="line">		;;</span><br><span class="line">	esac</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">ips&#x3D;()</span><br><span class="line"></span><br><span class="line">for (( c&#x3D;1; c&lt;&#x3D;$loop; c++ )); do</span><br><span class="line"></span><br><span class="line">	id&#x3D;$(random_id)</span><br><span class="line">	name&#x3D;&quot;$&#123;docker_name&#125;_$&#123;id&#125;&quot;</span><br><span class="line">	#echo &quot;Create docker : [$name]&quot;</span><br><span class="line">	uuid&#x3D;$(docker run -d --name $name $docker_image)</span><br><span class="line">	#echo &quot;$uuid&quot;</span><br><span class="line">	ips+&#x3D;($(docker inspect -f &#39;&#123;&#123;range.NetworkSettings.Networks&#125;&#125;&#123;&#123;.IPAddress&#125;&#125;&#123;&#123;end&#125;&#125;&#39; $uuid))</span><br><span class="line">	echo -ne &quot;.&quot;</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">echo &quot;&quot;</span><br><span class="line"></span><br><span class="line">for ip in &quot;$&#123;ips[@]&#125;&quot;; do</span><br><span class="line">	echo &quot;ssh $ip&quot;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>The script start x ssh local server \o/</p>
+<p>stopDocker_ssh.sh  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;bash</span><br><span class="line"></span><br><span class="line">name&#x3D;&#39;ssh_&#39;</span><br><span class="line"></span><br><span class="line">function usage()&#123;</span><br><span class="line"></span><br><span class="line">	echo &quot;-n [name] filter prefix to delete, default value: $name&quot;</span><br><span class="line">	echo &quot;-h show help&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">while getopts &quot;:n:h&quot; options; do</span><br><span class="line"></span><br><span class="line">	case &quot;$&#123;options&#125;&quot; in</span><br><span class="line">	h)</span><br><span class="line">		usage</span><br><span class="line">		exit</span><br><span class="line">		;;</span><br><span class="line">	n)</span><br><span class="line">		name&#x3D;$&#123;OPTARG&#125;</span><br><span class="line">		;;</span><br><span class="line">	:)</span><br><span class="line">		echo &quot;Error: -$&#123;OPTARG&#125; requires an argument.&quot;</span><br><span class="line">		usage</span><br><span class="line">		exit 4</span><br><span class="line">		;;</span><br><span class="line">	*)</span><br><span class="line">		echo &quot;Error: fail option...&quot;</span><br><span class="line">		usage</span><br><span class="line">		;;</span><br><span class="line">	esac</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># docker stop all containers</span><br><span class="line">docker stop $(docker ps -a -q -f name&#x3D;$name) &gt;&#x2F;dev&#x2F;null</span><br><span class="line"></span><br><span class="line"># Docker rm all</span><br><span class="line">docker rm $(docker ps -a -q -f name&#x3D;$name) &gt;&#x2F;dev&#x2F;null</span><br></pre></td></tr></table></figure>
+
+<p>This script stop and remove all docker how match “ssh_”</p>
+<p><img src="/2021/03/10/Docker-SSH-on-the-fly/dockerSSH.gif" alt="docker ssh gif"></p>
+<p>Now you can put this Bash script into your PATH ;)  </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/" data-id="clmktquwg0007qvd4cs8w61ed" class="article-share-link">Share</a>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a>
+      
+        <a href="https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ssh/" rel="tag">ssh</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2021/05/02/Create-your-hidden-Tor-service-with-unix-socket/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Create your hidden Tor service with unix socket
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/02/14/Load-Balance-Socks5-with-Nginx/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Load Balance Socks5 with Nginx</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTPS-TLS/" rel="tag">HTTPS/TLS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tunnel/" rel="tag">Tunnel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apache2/" rel="tag">apache2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/binwalk/" rel="tag">binwalk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/burp/" rel="tag">burp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/challenge/" rel="tag">challenge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cntlm/" rel="tag">cntlm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crowdsec/" rel="tag">crowdsec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/discord/" rel="tag">discord</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hackthebox/" rel="tag">hackthebox</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hidden-service/" rel="tag">hidden service</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lua/" rel="tag">lua</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/minecraft/" rel="tag">minecraft</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks/" rel="tag">socks</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks5/" rel="tag">socks5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlite/" rel="tag">sqlite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssf/" rel="tag">ssf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcp/" rel="tag">tcp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcpproxy/" rel="tag">tcpproxy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tor/" rel="tag">tor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/unix-socket/" rel="tag">unix socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websec/" rel="tag">websec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wireshark/" rel="tag">wireshark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/x-forwarded-for/" rel="tag">x-forwarded-for</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zero-day/" rel="tag">zero-day</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/HTTPS-TLS/" style="font-size: 10px;">HTTPS/TLS</a> <a href="/tags/Tunnel/" style="font-size: 10px;">Tunnel</a> <a href="/tags/apache2/" style="font-size: 10px;">apache2</a> <a href="/tags/binwalk/" style="font-size: 10px;">binwalk</a> <a href="/tags/burp/" style="font-size: 10px;">burp</a> <a href="/tags/challenge/" style="font-size: 20px;">challenge</a> <a href="/tags/cntlm/" style="font-size: 10px;">cntlm</a> <a href="/tags/crowdsec/" style="font-size: 10px;">crowdsec</a> <a href="/tags/ctf/" style="font-size: 10px;">ctf</a> <a href="/tags/discord/" style="font-size: 10px;">discord</a> <a href="/tags/docker/" style="font-size: 20px;">docker</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/hackthebox/" style="font-size: 20px;">hackthebox</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hidden-service/" style="font-size: 10px;">hidden service</a> <a href="/tags/lua/" style="font-size: 10px;">lua</a> <a href="/tags/minecraft/" style="font-size: 10px;">minecraft</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/socks/" style="font-size: 20px;">socks</a> <a href="/tags/socks5/" style="font-size: 10px;">socks5</a> <a href="/tags/sqlite/" style="font-size: 10px;">sqlite</a> <a href="/tags/ssf/" style="font-size: 10px;">ssf</a> <a href="/tags/ssh/" style="font-size: 10px;">ssh</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/tcpproxy/" style="font-size: 10px;">tcpproxy</a> <a href="/tags/tor/" style="font-size: 10px;">tor</a> <a href="/tags/unix-socket/" style="font-size: 10px;">unix socket</a> <a href="/tags/web/" style="font-size: 20px;">web</a> <a href="/tags/websec/" style="font-size: 10px;">websec</a> <a href="/tags/wireshark/" style="font-size: 10px;">wireshark</a> <a href="/tags/x-forwarded-for/" style="font-size: 10px;">x-forwarded-for</a> <a href="/tags/zero-day/" style="font-size: 10px;">zero-day</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">September 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/">Block malicious IP behind reverse proxy with Apache2 and Crowdsec</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/09/Patch-TCP-packets-on-the-fly/">Patch TCP packets on the fly</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/03/Zero-day-in-industrial-wifi-equipment/">Zero-day in industrial wifi equipment</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/02/Create-your-hidden-Tor-service-with-unix-socket/">Create your hidden Tor service with unix socket</a>
+          </li>
+        
+          <li>
+            <a href="/2021/03/10/Docker-SSH-on-the-fly/">Docker SSH on the fly</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2023 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+    <div>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/0x25" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'https-0x25-github-io';
+  
+  var disqus_url = 'https://0x25.github.io/2021/03/10/Docker-SSH-on-the-fly/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

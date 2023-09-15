@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+<!-- Global site tag (gtag.js) - Google Analytics [05012020]-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZVHC0BJQ4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-5ZVHC0BJQ4');
+</script>
+<!-- End Google Analytics -->
+
+
+  
+  <title>Patch TCP packets on the fly | --= 0x25 =--</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="PurposeSome time ago I had an application (not web) on a laptop (not admin) which was connected with a remote server. After some research I can change a config file to set a new IP:PORT for the serve">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Patch TCP packets on the fly">
+<meta property="og:url" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/index.html">
+<meta property="og:site_name" content="--&#x3D; 0x25 &#x3D;--">
+<meta property="og:description" content="PurposeSome time ago I had an application (not web) on a laptop (not admin) which was connected with a remote server. After some research I can change a config file to set a new IP:PORT for the serve">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/header.png">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/diagram.svg">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/analyse.png">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/diagram-patch.svg">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/tcpproxy.png">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/tcpproxy_patch.png">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/patched.png">
+<meta property="og:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/patchServerResponse.gif">
+<meta property="article:published_time" content="2021-09-09T18:55:39.000Z">
+<meta property="article:modified_time" content="2021-09-10T09:52:05.218Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="tcp">
+<meta property="article:tag" content="wireshark">
+<meta property="article:tag" content="tcpproxy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/header.png">
+  
+    <link rel="alternate" href="/atom.xml" title="--= 0x25 =--" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">--= 0x25 =--</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" target="_blank" rel="noopener" href="https://github.com/0x25">Github</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://0x25.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Patch-TCP-packets-on-the-fly" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2021/09/09/Patch-TCP-packets-on-the-fly/" class="article-date">
+  <time datetime="2021-09-09T18:55:39.000Z" itemprop="datePublished">09-09-2021</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Patch TCP packets on the fly
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/header.png" alt="tcp"></p>
+<h1 id="Purpose"><a href="#Purpose" class="headerlink" title="Purpose"></a>Purpose</h1><p>Some time ago I had an application (not web) on a laptop (not admin) which was connected with a remote server. After some research I can change a config file to set a new IP:PORT for the server. With this change, I can intercept the trafic and send it back to the server with tcpproxy.py tool. It help the use of wireshark to look at the traffic and to perfom action.  </p>
+<h1 id="Some-code"><a href="#Some-code" class="headerlink" title="Some code"></a>Some code</h1><p>For this post I coded a client / server to replicate what I got.</p>
+<p>client.py  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">import socket</span><br><span class="line">import argparse</span><br><span class="line">from itertools import cycle</span><br><span class="line"></span><br><span class="line">default_login &#x3D; &#39;user&#39;</span><br><span class="line">default_data &#x3D; &#39;Hello server&#39;</span><br><span class="line">key &#x3D; &#39;R9pRCDwWG8hw7BYg3wv3tZY&#39;</span><br><span class="line"></span><br><span class="line">parser &#x3D; argparse.ArgumentParser()</span><br><span class="line">parser.add_argument(&#39;-l&#39;,&#39;--login&#39;, default&#x3D;default_login, help&#x3D;&#39;user type [user] or admin&#39;)</span><br><span class="line">parser.add_argument(&#39;-d&#39;,&#39;--data&#39;, default&#x3D;default_data, help&#x3D;&#39;data send to server&#39;)</span><br><span class="line">args &#x3D; parser.parse_args()</span><br><span class="line"></span><br><span class="line">data_input &#x3D; args.data</span><br><span class="line">user_type &#x3D; args.login</span><br><span class="line"></span><br><span class="line">def xor(message,key):</span><br><span class="line">  cryptedMessage &#x3D; &#39;&#39;.join(chr(ord(c)^ord(k)) for c,k in zip(message, cycle(key)))</span><br><span class="line">  return cryptedMessage</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">f &#x3D; open(&quot;client_config.txt&quot;, &quot;r&quot;)</span><br><span class="line">server &#x3D; f.readline()</span><br><span class="line"></span><br><span class="line">ADRESSE &#x3D; server.split(&#39;:&#39;)[0]</span><br><span class="line">PORT &#x3D; int(server.split(&#39;:&#39;)[1])</span><br><span class="line"></span><br><span class="line"># Create a client socket</span><br><span class="line">clientSocket &#x3D; socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line"></span><br><span class="line"># Connect to the server</span><br><span class="line">clientSocket.connect((ADRESSE,PORT))</span><br><span class="line"></span><br><span class="line"># Send data to server</span><br><span class="line">data &#x3D; f&quot;&#123;user_type&#125;|&#123;data_input&#125;&quot;</span><br><span class="line">data &#x3D; xor(data,key)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">clientSocket.send(data.encode())</span><br><span class="line"></span><br><span class="line"># Receive data from server</span><br><span class="line">dataFromServer &#x3D; clientSocket.recv(1024)</span><br><span class="line"></span><br><span class="line"># Print to the console</span><br><span class="line">xor_output &#x3D; dataFromServer.decode()</span><br><span class="line"></span><br><span class="line">output &#x3D; xor(xor_output,key)</span><br><span class="line">if output.find(&#39;userType:1&#39;) &#x3D;&#x3D; 0:</span><br><span class="line">  print(&quot;you are ADMIN! (userType:1)&quot;)</span><br><span class="line"></span><br><span class="line">if output.find(&#39;userType:0&#39;) &#x3D;&#x3D; 0:</span><br><span class="line">  print(&quot;you are user :&#x2F; (userType:0)&quot;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>client_config.txt  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6781</span><br></pre></td></tr></table></figure>
+
+
+<p>server.py  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">import socket</span><br><span class="line">from signal import signal, SIGINT</span><br><span class="line">from sys import exit</span><br><span class="line">from itertools import cycle</span><br><span class="line"></span><br><span class="line"># xor key</span><br><span class="line">key &#x3D; &#39;R9pRCDwWG8hw7BYg3wv3tZY&#39;</span><br><span class="line"></span><br><span class="line">def xor(message,key):</span><br><span class="line">  cryptedMessage &#x3D; &#39;&#39;.join(chr(ord(c)^ord(k)) for c,k in zip(message, cycle(key)))</span><br><span class="line">  return cryptedMessage</span><br><span class="line"></span><br><span class="line">def handler(signal_received, frame):</span><br><span class="line">    # Handle any cleanup here</span><br><span class="line">    print(&#39;SIGINT or CTRL-C detected. Exiting gracefully&#39;)</span><br><span class="line">    exit(0)</span><br><span class="line"></span><br><span class="line">signal(SIGINT, handler)</span><br><span class="line"></span><br><span class="line">ADRESSE &#x3D; &#39;127.0.0.1&#39;</span><br><span class="line">PORT &#x3D; 6781</span><br><span class="line"></span><br><span class="line">server &#x3D; socket.socket(socket.AF_INET, socket.SOCK_STREAM)     </span><br><span class="line">server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)</span><br><span class="line">server.bind((ADRESSE, PORT))</span><br><span class="line">server.listen()</span><br><span class="line"></span><br><span class="line">while True:</span><br><span class="line">  client, adresseClient &#x3D; server.accept()</span><br><span class="line">  print(&#39;Connection from &#39;, adresseClient)</span><br><span class="line">  data_rcv &#x3D; client.recv(1024)</span><br><span class="line"></span><br><span class="line">  if not data_rcv:</span><br><span class="line">    print(&#39;Reception error&#39;)</span><br><span class="line"></span><br><span class="line">  else:</span><br><span class="line">    print(&#39;Reception of:&#39; + data_rcv.decode())</span><br><span class="line">    data &#x3D; xor(data_rcv.decode(),key)</span><br><span class="line">    print(f&#39;unxor &#123;data&#125;&#39;)</span><br><span class="line">    datas &#x3D; data.split(&#39;|&#39;)</span><br><span class="line">    user &#x3D; datas[0]</span><br><span class="line"></span><br><span class="line">    if user &#x3D;&#x3D; &#39;admin&#39;:</span><br><span class="line">      response &#x3D; &#39;userType:1;userRight:11111&#39;</span><br><span class="line">    else:</span><br><span class="line">      response &#x3D; &#39;userType:0:userRight:00000&#39;</span><br><span class="line"></span><br><span class="line">    response &#x3D; response + &#39;;randomId:666;randomValue:nodata;someField:&#39; + datas[1]</span><br><span class="line">    xor_response &#x3D; xor(response,key)</span><br><span class="line">    n &#x3D; client.send(xor_response.encode())</span><br><span class="line">        </span><br><span class="line">    if (n !&#x3D; len(response)):</span><br><span class="line">      print(&#39;Send error&#39;)</span><br><span class="line">    else:</span><br><span class="line">      print(&#39;Send ok.&#39;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="Analyse"><a href="#Analyse" class="headerlink" title="Analyse"></a>Analyse</h1><p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/diagram.svg" alt="diagram"> </p>
+<p>The information in packets is obfuscated.<br>By default the server listen on 6781.  </p>
+<p>If we look at the server output, in wireshark, we can notice some change in the same place :  </p>
+<p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/analyse.png" alt="tcp flow"></p>
+<ol>
+<li>request from server when logged as user</li>
+<li>request from server when logged as admin</li>
+</ol>
+<p>The idea is « <strong>what happen if we change the server answer to match a admin response from a user request ?</strong> »<br>We are going to try to do this :). Like I say before we can use <a target="_blank" rel="noopener" href="https://github.com/ickerwx/tcpproxy">tcpproxy.py</a> to patch tcp server response.</p>
+<h1 id="Patch-TCP-packet"><a href="#Patch-TCP-packet" class="headerlink" title="Patch TCP packet"></a>Patch TCP packet</h1><p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/diagram-patch.svg" alt="mitm diagram"></p>
+<p>So we edit the client_config.txt to set the tcpproxy listen port and run it.</p>
+<pre><code>./tcpproxy.py -ti 127.0.0.1 -tp 6781 -li 127.0.0.1 -lp 8888 -om hexdump -im hexdump</code></pre>
+<p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/tcpproxy.png" alt="tcpproxy"></p>
+<p>View of hexdump from tcpproxy.py : first the user connection and after the admin.<br>tcpproxy.py have the possibility to add module.</p>
+<p>patch.py (add in tcpproxy/proxymodules)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;usr&#x2F;bin&#x2F;env python3</span><br><span class="line">import os.path as path</span><br><span class="line">import re</span><br><span class="line">from itertools import cycle</span><br><span class="line"></span><br><span class="line">class Module:</span><br><span class="line">    def __init__(self, incoming&#x3D;False, verbose&#x3D;False, options&#x3D;None):</span><br><span class="line">        # patch tcp flow</span><br><span class="line">        self.name &#x3D; path.splitext(path.basename(__file__))[0]</span><br><span class="line">        self.description &#x3D; &#39;Patch tcp&#39;</span><br><span class="line">        self.incoming &#x3D; incoming  # incoming means module is on -im chain</span><br><span class="line">        self.start &#x3D; 46</span><br><span class="line">        self.end &#x3D; 66</span><br><span class="line">        self.str &#x3D; b&#39;\x09&#39;</span><br><span class="line">        self.patch &#x3D; b&#39;&#39;</span><br><span class="line">        self.key &#x3D; &#39;R9pRCDwWG8hw7BYg3wv3tZY&#39;</span><br><span class="line"></span><br><span class="line">    def xor(self,data):</span><br><span class="line">        cryptedMessage &#x3D; &#39;&#39;.join(chr(ord(c)^ord(k)) for c,k in zip(data, cycle(self.key)))</span><br><span class="line">        return cryptedMessage</span><br><span class="line"></span><br><span class="line">    def help(self):</span><br><span class="line">        return &#39;\tPatch TCP and more&#39;</span><br><span class="line"></span><br><span class="line">    def execute(self, data):</span><br><span class="line">        packets &#x3D; bytearray(data)</span><br><span class="line">        out &#x3D; self.xor(data.decode())</span><br><span class="line">        print(f&quot;unxor data: &#123;out&#125;&quot;)</span><br><span class="line"></span><br><span class="line">        if bytes(packets[6:11]).hex() &#x3D;&#x3D; &#39;07327d0852&#39;: # test hex signature to detect user packet</span><br><span class="line">            print(&#39;&gt; PATCH USER TO ADMIN&#39;)</span><br><span class="line">            packets[9] &#x3D; 9 # patch user to admin</span><br><span class="line"></span><br><span class="line">        return packets</span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    print (&#39;This module is not supposed to be executed alone!&#39;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>No we run the command:  </p>
+<pre><code>./tcpproxy.py -ti 127.0.0.1 -tp 6781 -li 127.0.0.1 -lp 8888 -om hexdump,patch</code></pre>
+<p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/tcpproxy_patch.png" alt="tcpproxy patch"></p>
+<ol>
+<li>server response</li>
+<li>tcpproxy patch repsonse </li>
+</ol>
+<p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/patched.png" alt="patched"></p>
+<p>The client.py think we are admin \o/  </p>
+<p><img src="/2021/09/09/Patch-TCP-packets-on-the-fly/patchServerResponse.gif" alt="demo time"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/" data-id="clmktquxa000fqvd4gkdc5joh" class="article-share-link">Share</a>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a>
+      
+        <a href="https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tcp/" rel="tag">tcp</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tcpproxy/" rel="tag">tcpproxy</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wireshark/" rel="tag">wireshark</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Block malicious IP behind reverse proxy with Apache2 and Crowdsec
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/08/03/Zero-day-in-industrial-wifi-equipment/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Zero-day in industrial wifi equipment</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/HTTPS-TLS/" rel="tag">HTTPS/TLS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Tunnel/" rel="tag">Tunnel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apache2/" rel="tag">apache2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/binwalk/" rel="tag">binwalk</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/burp/" rel="tag">burp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/challenge/" rel="tag">challenge</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cntlm/" rel="tag">cntlm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/crowdsec/" rel="tag">crowdsec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ctf/" rel="tag">ctf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/discord/" rel="tag">discord</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/github/" rel="tag">github</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hackthebox/" rel="tag">hackthebox</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hidden-service/" rel="tag">hidden service</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/lua/" rel="tag">lua</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/minecraft/" rel="tag">minecraft</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nginx/" rel="tag">nginx</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks/" rel="tag">socks</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/socks5/" rel="tag">socks5</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sqlite/" rel="tag">sqlite</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssf/" rel="tag">ssf</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcp/" rel="tag">tcp</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tcpproxy/" rel="tag">tcpproxy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tor/" rel="tag">tor</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/unix-socket/" rel="tag">unix socket</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/web/" rel="tag">web</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/websec/" rel="tag">websec</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/wireshark/" rel="tag">wireshark</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/x-forwarded-for/" rel="tag">x-forwarded-for</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zero-day/" rel="tag">zero-day</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/HTTPS-TLS/" style="font-size: 10px;">HTTPS/TLS</a> <a href="/tags/Tunnel/" style="font-size: 10px;">Tunnel</a> <a href="/tags/apache2/" style="font-size: 10px;">apache2</a> <a href="/tags/binwalk/" style="font-size: 10px;">binwalk</a> <a href="/tags/burp/" style="font-size: 10px;">burp</a> <a href="/tags/challenge/" style="font-size: 20px;">challenge</a> <a href="/tags/cntlm/" style="font-size: 10px;">cntlm</a> <a href="/tags/crowdsec/" style="font-size: 10px;">crowdsec</a> <a href="/tags/ctf/" style="font-size: 10px;">ctf</a> <a href="/tags/discord/" style="font-size: 10px;">discord</a> <a href="/tags/docker/" style="font-size: 20px;">docker</a> <a href="/tags/github/" style="font-size: 10px;">github</a> <a href="/tags/hackthebox/" style="font-size: 20px;">hackthebox</a> <a href="/tags/hexo/" style="font-size: 10px;">hexo</a> <a href="/tags/hidden-service/" style="font-size: 10px;">hidden service</a> <a href="/tags/lua/" style="font-size: 10px;">lua</a> <a href="/tags/minecraft/" style="font-size: 10px;">minecraft</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/socks/" style="font-size: 20px;">socks</a> <a href="/tags/socks5/" style="font-size: 10px;">socks5</a> <a href="/tags/sqlite/" style="font-size: 10px;">sqlite</a> <a href="/tags/ssf/" style="font-size: 10px;">ssf</a> <a href="/tags/ssh/" style="font-size: 10px;">ssh</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/tcpproxy/" style="font-size: 10px;">tcpproxy</a> <a href="/tags/tor/" style="font-size: 10px;">tor</a> <a href="/tags/unix-socket/" style="font-size: 10px;">unix socket</a> <a href="/tags/web/" style="font-size: 20px;">web</a> <a href="/tags/websec/" style="font-size: 10px;">websec</a> <a href="/tags/wireshark/" style="font-size: 10px;">wireshark</a> <a href="/tags/x-forwarded-for/" style="font-size: 10px;">x-forwarded-for</a> <a href="/tags/zero-day/" style="font-size: 10px;">zero-day</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">September 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">March 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">February 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">January 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">December 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/09/15/Block-malicious-IP-behind-reverse-proxy-with-Apache2-and-Crowdsec/">Block malicious IP behind reverse proxy with Apache2 and Crowdsec</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/09/Patch-TCP-packets-on-the-fly/">Patch TCP packets on the fly</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/03/Zero-day-in-industrial-wifi-equipment/">Zero-day in industrial wifi equipment</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/02/Create-your-hidden-Tor-service-with-unix-socket/">Create your hidden Tor service with unix socket</a>
+          </li>
+        
+          <li>
+            <a href="/2021/03/10/Docker-SSH-on-the-fly/">Docker SSH on the fly</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2023 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+    <div>
+      <a class="github-button" target="_blank" rel="noopener" href="https://github.com/0x25" data-size="large" data-show-count="true" aria-label="Follow @0x25 on GitHub">Follow @0x25</a
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/0x25" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'https-0x25-github-io';
+  
+  var disqus_url = 'https://0x25.github.io/2021/09/09/Patch-TCP-packets-on-the-fly/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
